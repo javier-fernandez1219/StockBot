@@ -1,0 +1,2 @@
+# StockBot
+Watches Stocks
