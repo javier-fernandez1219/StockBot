@@ -1,4 +1,5 @@
 import discord
+from requests.models import Response
 from Packages import Utils     
                                                         
 
@@ -27,6 +28,23 @@ async def on_message(message):
         t = message.content.split(":")[1]
         resp = yfi.get_ticker(ticker=t)
         await message.channel.send(resp)
+    
+    if message.content.lower().startswith('div!'):
+        d = message.content.split(" ")[1]
+        div = yfi.get_dividend(ticker=d)
+        await message.channel.send(div)
+
+    if message.content.lower().startswith('wl!'):
+        user_list = yfi.get_userlist(message.author.name)
+        await message.channel.send(user_list)
+      
+    if message.content.lower().startswith('wla!'):
+        t = message.content.split(":")[1]
+        await message.channel.send(yfi.add_userlist_item(message.author.name, t))
+
+    if message.content.lower().startswith('wld!'):
+        t = message.content.split(":")[1]
+        await message.channel.send(yfi.del_userlist_item(message.author.name, t))    
       
 
 ## Run the client 
