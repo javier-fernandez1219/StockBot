@@ -1,11 +1,14 @@
 import discord
-from Packages import Utils     
-                                                        
+from Packages import Utils
+from database import db
+
 
 yfi = Utils.Finance()
-## Our bot 
-client = discord.Client()
 
+
+## Our bot 
+token = open("token.txt","r").read()
+client = discord.Client()
 @client.event
 async def on_ready():
 ##Things to do 
@@ -30,4 +33,4 @@ async def on_message(message):
       
 
 ## Run the client 
-client.run('ODU3Njg5OTQyNjkwODg5NzM4.YNTQAQ.E3s4n8zRuuV6vGw5CZppN5DcfyM')
+client.run(token)
