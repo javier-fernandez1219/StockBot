@@ -1,11 +1,6 @@
 import discord
-<<<<<<< HEAD
-
-client = discord.Client()
-=======
 from Packages import Utils     
                                                         
->>>>>>> origin/danny
 
 yfi = Utils.Finance()
 ## Our bot 
