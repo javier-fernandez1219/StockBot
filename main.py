@@ -16,9 +16,6 @@ async def on_ready():
             f'{guild.name}(id: {guild.id})'
         )        
         
-    #general_channel = client.get_channel(855657973438611467)
-    #await general_channel.send('Hello, World!')
-
 @client.event
 async def on_message(message):
     if message.author == client.user:
