@@ -1,5 +1,9 @@
 import yfinance as yf
 import pandas as pd
+import requests
+import bs4
+from bs4 import BeautifulSoup
+from yfinance import ticker
 
 class Finance():
     def __init__(self):
@@ -35,6 +39,18 @@ class Finance():
         list.remove(ticker.upper())
         return "Ticker removed from the list!"
 
+def getData(symbol):
+    url=f'https://finance.yahoo.com/quote/{symbol}'
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    stock = {
+    'symbol': symbol,
+    'price': soup.find('div', {'class':'D(ib) Mend(20px)'}).find_all('span')[0].text,
+    'change': soup.find('div', {'class': 'D(ib) Mend(20px)'}).find_all('span')[1].text,
+    }
+    return stock
+
+print(getData('TSLA'))  
 
 
-        
+     
