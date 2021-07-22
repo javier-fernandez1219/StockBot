@@ -30,12 +30,12 @@ class Finance():
             else:
                 list.append(self.getData(ticker))
         else:
-            self.userlist[user]=self.getData(ticker)
+            self.userlist[user]=[self.getData(ticker)]
         return "Ticker added to your watchlist!"
 
     def del_userlist_item(self, user, ticker):
-        list = self.userlist[user]
-        list.remove(ticker.upper())
+        l = self.userlist[user]
+        self.userlist[user] = list(filter(lambda i: i['symbol'] != ticker.upper(), l))            
         return "Ticker removed from the list!"
 
     def getData(self, symbol):
@@ -49,7 +49,6 @@ class Finance():
         }
         return stock
 
-# print(getData('TSLA'))
 
 
         
