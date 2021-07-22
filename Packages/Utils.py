@@ -1,5 +1,8 @@
 import yfinance as yf
 import pandas as pd
+import requests
+import bs4
+from bs4 import BeautifulSoup
 
 class Finance():
     def __init__(self):
@@ -25,15 +28,26 @@ class Finance():
             if ticker in list:
                 return("Ticker already added!")
             else:
-                list.append(ticker.upper()) 
+                list.append(self.getData(ticker))
         else:
-            self.userlist[user]=[ticker.upper()]
+            self.userlist[user]=[self.getData(ticker)]
         return "Ticker added to your watchlist!"
 
     def del_userlist_item(self, user, ticker):
-        list = self.userlist[user]
-        list.remove(ticker.upper())
+        l = self.userlist[user]
+        self.userlist[user] = list(filter(lambda i: i['symbol'] != ticker.upper(), l))            
         return "Ticker removed from the list!"
+
+    def getData(self, symbol):
+        url=f'https://finance.yahoo.com/quote/{symbol.upper()}'
+        r = requests.get(url)
+        soup = BeautifulSoup(r.text, 'html.parser')
+        stock = {
+        'symbol': symbol,
+        'price': soup.find('div', {'class':'D(ib) Mend(20px)'}).findAll('span')[0].text,
+        'change': soup.find('div', {'class': 'D(ib) Mend(20px)'}).findAll('span')[1].text,
+        }
+        return stock
 
 
 
