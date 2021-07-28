@@ -1,4 +1,4 @@
 MongoDB= {
     'user': 'admin',
-    'password':'N4r4nj0$'
+    'password':'EreYHEFuBb0OTF7n'
 }

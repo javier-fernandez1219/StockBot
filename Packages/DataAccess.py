@@ -1,8 +1,12 @@
+from Packages.Configuration import MongoDB
 from pymongo import MongoClient
+from Packages import Configuration as cfg
 
 class dal:
     def __init__(self):
-        self.connection = 'mongodb://admin:N4r4nj0$@cluster0-shard-00-00.zi9uo.mongodb.net:27017,cluster0-shard-00-01.zi9uo.mongodb.net:27017,cluster0-shard-00-02.zi9uo.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-bht7sv-shard-0&authSource=admin&retryWrites=true&w=majority'
+        user = cfg.MongoDB["user"]
+        password = cfg.MongoDB["password"]
+        self.connection = f'mongodb://{user}:{password}@cluster0-shard-00-00.zi9uo.mongodb.net:27017,cluster0-shard-00-01.zi9uo.mongodb.net:27017,cluster0-shard-00-02.zi9uo.mongodb.net:27017/sw?ssl=true&replicaSet=atlas-bht7sv-shard-0&authSource=admin&retryWrites=true&w=majority'
     def add_user(self, user):
         client = MongoClient(self.connection)
         db = client.sw
