@@ -3,10 +3,12 @@ import pandas as pd
 import requests
 import bs4
 from bs4 import BeautifulSoup
+from Packages import DataAccess
 
 class Finance():
     def __init__(self):
         self.userlist = {}
+        self.dal = DataAccess.dal()
 
     def get_ticker(self, ticker):
         #print(self.test)
@@ -20,23 +22,53 @@ class Finance():
         return d.dividends.tail(1)
     
     def get_userlist(self, user):
-        return(self.userlist[user])
+        userwl = self.dal.get_user(user)
+        result = {}
+        for ticker in userwl['stocks'].keys():
+            qoute = self.get_last_quote(ticker)
+            result[userwl['stocks'][ticker]] = f'({qoute["ticker"]})     {qoute["currentPrice"]}     {qoute["changeDollar"]} ({qoute["changePercent"]}%)'
+        return(result)
 
     def add_userlist_item(self, user, ticker):
-        if user in self.userlist.keys():
-            list = self.userlist[user]
-            if ticker in list:
+        t = yf.Ticker(ticker)
+        name = t.info['shortName']
+        userwl = self.dal.get_user(user)
+        if userwl is None:
+            self.dal.add_user({
+                                'userid': user,
+                                'stocks': {ticker: name}
+                            })
+        else:
+            if ticker in userwl['stocks']:
                 return("Ticker already added!")
             else:
-                list.append(self.getData(ticker))
-        else:
-            self.userlist[user]=[self.getData(ticker)]
+                userwl['stocks'][ticker] = name
+                self.dal.upd_user(userwl)
+            #self.userlist[user] = {ticker: name}
         return "Ticker added to your watchlist!"
 
     def del_userlist_item(self, user, ticker):
-        l = self.userlist[user]
-        self.userlist[user] = list(filter(lambda i: i['symbol'] != ticker.upper(), l))            
+        userwl = self.dal.get_user(user)
+        userwl['stocks'].pop(ticker)
+        self.dal.upd_user(userwl)
         return "Ticker removed from the list!"
+    def get_last_quote(self, ticker):
+        t = yf.Ticker(ticker)
+        data = t.history(period="max", interval="1d").tail(2)
+        beforeLastDay = data.iloc[0, :]
+        lastDay = data.iloc[1, :]
+        #last_quote = data.tail(1)
+        closePrice = round(lastDay['Close'],3)
+        previousClose = round(beforeLastDay['Close'],3)
+        changeDollar = round(closePrice - previousClose,3)
+        changePercent = round((changeDollar/previousClose)*100,3)
+        qoute = {
+            "ticker" : ticker,
+            "currentPrice" : closePrice,
+            "changeDollar" : changeDollar,
+            "changePercent" : changePercent
+        }
+        return qoute
 
     def getData(self, symbol):
         url=f'https://finance.yahoo.com/quote/{symbol.upper()}'
