@@ -1,11 +1,13 @@
 import discord
+from discord.ext import commands
 from requests.models import Response
 from Packages import Utils     
+from Packages import Configuration as cfg
                                                         
 
 yfi = Utils.Finance()
 ## Our bot 
-client = discord.Client()
+client = commands.Bot(command_prefix='#')
 
 @client.event
 async def on_ready():
@@ -16,39 +18,49 @@ async def on_ready():
             f'{guild.name}(id: {guild.id})'
         )        
         
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
+@client.command(name='list', help='Use #list to view the stocks in your WL.')
+async def list(ctx):
+    user_list = yfi.get_userlist(ctx.author.name)
+    userid = ctx.author.id
+    ment = ctx.author.mention
+    embedVar = discord.Embed(title=f'Watch List', description=f"Stocks {ment} likes!", color=0x00ff00)
+    for t in user_list.keys():
+        embedVar.add_field(name=t, value=user_list[t], inline=False)
+    embedVar.set_footer(text="Cheers!!")
+    await ctx.channel.send(embed=embedVar)
 
-    if message.content.lower().startswith('q!'):
-        t = message.content.split(":")[1]
-        resp = yfi.get_ticker(ticker=t)
-        await message.channel.send(resp)
-    
-    if message.content.lower().startswith('div!'):
-        d = message.content.split(" ")[1]
-        div = yfi.get_dividend(ticker=d)
-        await message.channel.send(div)
+@client.command(name='add', help='Use #add to add a ticker symbol from your WL.')
+async def add(ctx, ticker):
+    await ctx.channel.send(yfi.add_userlist_item(ctx.author.name, ticker))
 
-    if message.content.lower().startswith('wl!'):
-        user_list = yfi.get_userlist(message.author.name)
-        userid = message.author.id
-        ment = message.author.mention
-        embedVar = discord.Embed(title=f'Watch List', description=f"Stocks {ment} likes!", color=0x00ff00)
-        for t in user_list.keys():
-            embedVar.add_field(name=t, value=user_list[t], inline=False)
-        embedVar.set_footer(text="Cheers!!")
-        await message.channel.send(embed=embedVar)
-      
-    if message.content.lower().startswith('wla!'):
-        t = message.content.split(":")[1]
-        await message.channel.send(yfi.add_userlist_item(message.author.name, t))
+@client.command(name='delete', help='Use #delete to remove a ticker symbol from your WL.')
+async def delete(ctx, ticker):
+    await ctx.channel.send(yfi.del_userlist_item(ctx.author.name, ticker))
 
-    if message.content.lower().startswith('wld!'):
-        t = message.content.split(":")[1]
-        await message.channel.send(yfi.del_userlist_item(message.author.name, t))    
-      
+@add.error
+async def add_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.channel.send('add command requires the ticker symbol.')   
+
+@delete.error
+async def del_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.channel.send('delete command requires the ticker symbol.')       
 
 ## Run the client 
-client.run('ODU3Njg5OTQyNjkwODg5NzM4.YNTQAQ.E3s4n8zRuuV6vGw5CZppN5DcfyM')
+client.run(cfg.Discord['token'])
+
+# @client.event
+# async def on_message(message):
+#     if message.author == client.user:
+#         return
+
+#     if message.content.lower().startswith('q!'):
+#         t = message.content.split(":")[1]
+#         resp = yfi.get_ticker(ticker=t)
+#         await message.channel.send(resp)
+    
+#     if message.content.lower().startswith('div!'):
+#         d = message.content.split(" ")[1]
+#         div = yfi.get_dividend(ticker=d)
+#         await message.channel.send(div)
