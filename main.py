@@ -24,9 +24,12 @@ async def list(ctx):
     userid = ctx.author.id
     ment = ctx.author.mention
     embedVar = discord.Embed(title=f'Watch List', description=f"Stocks {ment} likes!", color=0x00ff00)
+    embedVar.set_thumbnail(url='https://stockbotimages.s3.us-east-2.amazonaws.com/stock_cs_chart.png')
+    # embedVar.from_dict(user_list)
+    # print(user_list)
     for t in user_list.keys():
         embedVar.add_field(name=t, value=user_list[t], inline=False)
-    embedVar.set_footer(text="Cheers!!")
+    embedVar.set_footer(text="Good luck with your stock picks.")
     await ctx.channel.send(embed=embedVar)
 
 @client.command(name='add', help='Use #add to add a ticker symbol from your WL.')
@@ -41,6 +44,8 @@ async def delete(ctx, ticker):
 async def add_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.channel.send('add command requires the ticker symbol.')   
+    if isinstance(error, commands.CommandInvokeError) and str(error).find("shortName") > 0 :
+        await ctx.channel.send('Invalid ticker symbol.')
 
 @delete.error
 async def del_error(ctx, error):

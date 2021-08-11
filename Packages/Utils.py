@@ -26,10 +26,14 @@ class Finance():
         result = {}
         for ticker in userwl['stocks'].keys():
             qoute = self.get_last_quote(ticker)
-            result[userwl['stocks'][ticker]] = f'({qoute["ticker"]})     {qoute["currentPrice"]}     {qoute["changeDollar"]} ({qoute["changePercent"]}%)'
+            sign = ''
+            if qoute["changeDollar"] >= 0:
+                sign = '+'
+            result[userwl['stocks'][ticker]] = f'[{qoute["ticker"]}]     {qoute["currentPrice"]}     {sign}{qoute["changeDollar"]} ({sign}{qoute["changePercent"]}%)'
         return(result)
 
     def add_userlist_item(self, user, ticker):
+        ticker = str(ticker).upper()
         t = yf.Ticker(ticker)
         name = t.info['shortName']
         userwl = self.dal.get_user(user)
@@ -48,6 +52,7 @@ class Finance():
         return "Ticker added to your watchlist!"
 
     def del_userlist_item(self, user, ticker):
+        ticker = str(ticker).upper()
         userwl = self.dal.get_user(user)
         userwl['stocks'].pop(ticker)
         self.dal.upd_user(userwl)
@@ -58,10 +63,10 @@ class Finance():
         beforeLastDay = data.iloc[0, :]
         lastDay = data.iloc[1, :]
         #last_quote = data.tail(1)
-        closePrice = round(lastDay['Close'],3)
-        previousClose = round(beforeLastDay['Close'],3)
-        changeDollar = round(closePrice - previousClose,3)
-        changePercent = round((changeDollar/previousClose)*100,3)
+        closePrice = round(lastDay['Close'],2)
+        previousClose = round(beforeLastDay['Close'],2)
+        changeDollar = round(closePrice - previousClose,2)
+        changePercent = round((changeDollar/previousClose)*100,2)
         qoute = {
             "ticker" : ticker,
             "currentPrice" : closePrice,
