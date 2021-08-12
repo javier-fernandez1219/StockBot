@@ -31,7 +31,10 @@ class Finance():
                 sign = '+'
             result[userwl['stocks'][ticker]] = f'[{qoute["ticker"]}]     {qoute["currentPrice"]}     {sign}{qoute["changeDollar"]} ({sign}{qoute["changePercent"]}%)'
         return(result)
-
+    def get_quote(self, ticker):
+        ticker = str(ticker).upper()
+        t = yf.Ticker(ticker)
+        return(t)
     def add_userlist_item(self, user, ticker):
         ticker = str(ticker).upper()
         t = yf.Ticker(ticker)

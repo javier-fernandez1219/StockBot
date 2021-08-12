@@ -3,6 +3,8 @@ from discord.ext import commands
 from requests.models import Response
 from Packages import Utils     
 from Packages import Configuration as cfg
+from urllib.parse import urlparse
+
                                                         
 
 yfi = Utils.Finance()
@@ -17,7 +19,20 @@ async def on_ready():
             f'{client.user} is connected to the following guild:\n'
             f'{guild.name}(id: {guild.id})'
         )        
-        
+@client.command(name='quote', help='Use #quote symbol to view the most recent quote.')
+async def quote(ctx, ticker):
+    q = yfi.get_quote(ticker)
+    embedVar = discord.Embed(title=f'Quote', description=f"Stocks quote", color=0x052d68)
+    domain = ''
+    try:    
+        domain = urlparse(q.info["website"]).netloc
+    except: 
+        print('missing website key')    
+    embedVar.set_thumbnail(url=f'https://logo.clearbit.com/{domain}')
+    embedVar.set_footer(text="Good luck with your stock picks.")
+    await ctx.channel.send(embed=embedVar)
+
+
 @client.command(name='list', help='Use #list to view the stocks in your WL.')
 async def list(ctx):
     user_list = yfi.get_userlist(ctx.author.name)
