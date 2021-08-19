@@ -9,6 +9,7 @@ yfinance = "*"
 pandas = "*"
 requests = "*"
 bs4 = "*"
+pymongo = "*"
 
 [dev-packages]
 
