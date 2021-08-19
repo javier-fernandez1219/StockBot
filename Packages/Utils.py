@@ -1,8 +1,5 @@
 import yfinance as yf
 import pandas as pd
-import requests
-import bs4
-from bs4 import BeautifulSoup
 from Packages import DataAccess
 
 class Finance():
@@ -60,6 +57,7 @@ class Finance():
         userwl['stocks'].pop(ticker)
         self.dal.upd_user(userwl)
         return "Ticker removed from the list!"
+
     def get_last_quote(self, ticker):
         t = yf.Ticker(ticker)
         data = t.history(period="max", interval="1d").tail(2)
@@ -78,16 +76,6 @@ class Finance():
         }
         return qoute
 
-    def getData(self, symbol):
-        url=f'https://finance.yahoo.com/quote/{symbol.upper()}'
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text, 'html.parser')
-        stock = {
-        'symbol': symbol,
-        'price': soup.find('div', {'class':'D(ib) Mend(20px)'}).findAll('span')[0].text,
-        'change': soup.find('div', {'class': 'D(ib) Mend(20px)'}).findAll('span')[1].text,
-        }
-        return stock
 
 
 

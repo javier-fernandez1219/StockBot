@@ -3,7 +3,6 @@ from discord.ext import commands
 from requests.models import Response
 from Packages import Utils     
 from Packages import Configuration as cfg
-from urllib.parse import urlparse
 
                                                         
 
@@ -22,13 +21,12 @@ async def on_ready():
 @client.command(name='quote', help='Use #quote symbol to view the most recent quote.')
 async def quote(ctx, ticker):
     q = yfi.get_quote(ticker)
-    embedVar = discord.Embed(title=f'Quote', description=f"Stocks quote", color=0x052d68)
-    domain = ''
-    try:    
-        domain = urlparse(q.info["website"]).netloc
-    except: 
-        print('missing website key')    
-    embedVar.set_thumbnail(url=f'https://logo.clearbit.com/{domain}')
+    q_info = q.info
+    embedVar = discord.Embed(title=f'{q_info.get("longName")} [{q_info.get("symbol")}]', description = "_**Summary**_",color=0x052d68)
+    embedVar.add_field(name= "Price", value= f'Previous Close: `{round(q_info.get("previousClose"), 2)}`\n' 
+                                             f'Market Open: `{q_info.get("regularMarketOpen")}`\n' 
+                                             f'Current Price: `{round(q_info.get("currentPrice"), 2)}`\n ', inline=True)    
+    embedVar.set_thumbnail(url= q_info.get('logo_url'))
     embedVar.set_footer(text="Good luck with your stock picks.")
     await ctx.channel.send(embed=embedVar)
 
@@ -69,18 +67,3 @@ async def del_error(ctx, error):
 
 ## Run the client 
 client.run(cfg.Discord['token'])
-
-# @client.event
-# async def on_message(message):
-#     if message.author == client.user:
-#         return
-
-#     if message.content.lower().startswith('q!'):
-#         t = message.content.split(":")[1]
-#         resp = yfi.get_ticker(ticker=t)
-#         await message.channel.send(resp)
-    
-#     if message.content.lower().startswith('div!'):
-#         d = message.content.split(" ")[1]
-#         div = yfi.get_dividend(ticker=d)
-#         await message.channel.send(div)
