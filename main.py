@@ -3,6 +3,7 @@ from discord.ext import commands
 from requests.models import Response
 from Packages import Utils     
 from Packages import Configuration as cfg
+import datetime
 
                                                         
 
@@ -18,14 +19,21 @@ async def on_ready():
             f'{client.user} is connected to the following guild:\n'
             f'{guild.name}(id: {guild.id})'
         )        
-@client.command(name='quote', help='Use #quote symbol to view the most recent quote.')
+@client.command(name='quote', help='Use `#quote` symbol to view the most recent quote.')
 async def quote(ctx, ticker):
     q = yfi.get_quote(ticker)
     q_info = q.info
-    embedVar = discord.Embed(title=f'{q_info.get("longName")} [{q_info.get("symbol")}]', description = "_**Summary**_",color=0x052d68)
-    embedVar.add_field(name= "Price", value= f'Previous Close: `{round(q_info.get("previousClose"), 2)}`\n' 
-                                             f'Market Open: `{q_info.get("regularMarketOpen")}`\n' 
-                                             f'Current Price: `{round(q_info.get("currentPrice"), 2)}`\n ', inline=True)    
+    #if datetime.datetime.utcnow() - datetime.timedelta(hours=4) <= :
+    embedVar = discord.Embed(title=f'{q_info.get("longName")} [{q_info.get("symbol")}]', description = "_**Summary**_",color=0x052d68, timestamp=datetime.datetime.utcnow())
+    embedVar.add_field(name= "Price", value= f'Close: `{round(q_info.get("previousClose"), 2)}`\n' 
+                                             f'Open: `{q_info.get("regularMarketOpen")}`\n' 
+                                             f'Current Price: `{round(q_info.get("currentPrice"), 2)}`\n ', inline=True)
+    embedVar.add_field(name= "Financials", value = f'Dividend: `{q_info.get("dividendRate")}({round(q_info.get("dividendRate")/q_info.get("currentPrice")*100,2)}%)`\n'
+                                                   f'Volume: `{q_info.get("volume"):,}`\n' 
+                                                   f'Average Volume: `{q_info.get("averageVolume"):,}`\n'
+                                                   f'Market Cap: `{q_info.get("marketCap"):,}`\n'
+                                                   f'EPS: `{q_info.get("trailingEps")}`\n'
+                                                   f'52 Week Range: `{q_info.get("fiftyTwoWeekLow")} - {q_info.get("fiftyTwoWeekHigh")}`',inline=False)
     embedVar.set_thumbnail(url= q_info.get('logo_url'))
     embedVar.set_footer(text="Good luck with your stock picks.")
     await ctx.channel.send(embed=embedVar)
